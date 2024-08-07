@@ -1,0 +1,19 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+inquirerpy = "*"
+pandas = "*"
+faker = "*"
+rich = "*"
+flake8 = "*"
+flake8-html = "*"
+pytest = "*"
+unidecode = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.11"
