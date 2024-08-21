@@ -49,7 +49,7 @@ def normalize_national_id(national_id: str) -> str:
 
 def validate_date_format(date_str: str) -> bool:
     """
-    Valide le format de la date en 'JJ-MM-AAAA' ou 'JJ/MM/AAAA'.
+    Valide le format de la date en 'JJ-MM-AAAA' , 'JJ/MM/AAAA' ou 'JJMMAAAA'.
 
     Args:
         date_str (str): La chaîne de caractères de la date à valider.
@@ -125,4 +125,5 @@ def get_timestamp():
     # On utilise la fonction datetime.now() pour obtenir la date et l'heure actuelles
     # On utilise la méthode strftime() pour formater la date et l'heure en "JJ-MM-AAAA-HH-MM-SS"
     # On supprime la dernière partie ("SS") pour obtenir la chaîne de caractères de la forme "JJ-MM-AAAA-HH-MM"
+    # Verifier traitement x2
     return datetime.now().strftime("%d-%m-%Y-%H-%M-%S")[:-3]
