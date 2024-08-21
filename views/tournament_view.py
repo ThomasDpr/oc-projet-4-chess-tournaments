@@ -1,6 +1,7 @@
 from InquirerPy import inquirer
 from InquirerPy.base.control import Choice
 from InquirerPy.separator import Separator
+from rich.console import Console
 from rich.table import Table, box
 
 from utils.utils import clear_console
@@ -14,6 +15,25 @@ class TournamentView(BaseView):
         """
 
         super().__init__()
+        self.name = ""
+        self.location = ""
+        self.start_date = ""
+        self.end_date = ""
+        self.description = ""
+        self.rounds_count = 4  # Valeur par défaut
+        self.current_step = 0
+
+    def reset_info(self):
+        """
+        Réinitialise les informations du tournoi.
+        """
+        self.name = ""
+        self.location = ""
+        self.start_date = ""
+        self.end_date = ""
+        self.description = ""
+        self.rounds_count = 4  # Valeur par défaut
+        self.current_step = 0
 
     def show_message(self, message):
         """
@@ -24,20 +44,36 @@ class TournamentView(BaseView):
         """
         self.console.print(message)
 
-    def show_menu(self):
+    def display_tournament_menu(self):
         """
         Affiche le menu principal de gestion des tournois.
         """
+        longest_choice_length = max(
+            len("Liste de tous les tournois"),
+            len("Ajouter un tournoi"),
+            len("Démarrer un tournoi"),
+            len("Reprendre un tournoi"),
+            len("Retour au menu principal"),
+        )
+
         menu_options = [
-            Choice("1", name="📋 Liste de tous les tournois"),
-            Choice("2", name="➕ Ajouter un tournoi"),
-            Choice("3", name="🏁 Démarrer un tournoi"),
-            Choice("4", name="🔄 Reprendre un tournoi"),
-            Separator(),
-            Choice("5", name="🔙 Retour au menu principal"),
+            Choice("add_tournament", name="Ajouter un tournoi"),
+            Choice("start_tournament", name="Démarrer un tournoi"),
+            Choice("resume_tournament", name="Reprendre un tournoi"),
+            Choice("tournament_list", name="Afficher tous les tournois"),
+            Separator(line="-" * longest_choice_length),
+            Choice("back_to_main_menu", name="Retour au menu principal"),
         ]
         self.choice = inquirer.select(
             message="Gestion des tournois \n",
+            long_instruction="\nDans le menu Gestion des tournois, vous avez accès à ces cinq fonctionnalités :"
+            "\n\n- Ajouter un tournoi (celui-ci sera créé puis enregistré en base de données)"
+            "\n- Démarrer un tournoi (vous serez invité à sélectionner un tournoi existant)"
+            "\n- Reprendre un tournoi (vous pourrez reprendre un tournoi en cours)"
+            "\n- Liste de tous les tournois (vous pourrez visualiser les informations complète de tous les tournois)"
+            "\n- Retour au menu principal (vous pourrez revenir au menu principal pour les autres fonctionnalités)\n"
+            "\n\n❗️ Attention : Tout ajout, ou démarrage d'un tournoi entraînera"
+            "la modification immédiate et automatique du fichier 'datas/tournaments.json'",
             choices=menu_options,
             pointer="❯",
             qmark="",
@@ -56,56 +92,113 @@ class TournamentView(BaseView):
 
     def get_tournament_info(self):
         """
-        Récupère les informations du tournoi auprès de l'utilisateur.
-
-        Returns:
-            tuple: Les informations du tournoi (nom, location, start_date, end_date, description, rounds_count).
+        Capture les informations du tournoi en interrogeant l'utilisateur étape par étape.
+        Gère l'édition des informations et la confirmation de la création du tournoi.
         """
-        name = self.text_with_cancel("Nom du tournoi :")
-        if name is None:
-            return None
+        self.reset_info()
 
-        location = self.text_with_cancel("Localisation :")
-        if location is None:
-            return None
+        steps = [
+            (
+                "name",
+                "Nom du tournoi :",
+                "Veuillez entrer le Nom du tournoi.\n"
+                "Si vous appuyez sur la touche 'Entrée' sans rien saisir,"
+                "vous aurez la possibilité d'annuler l'opération.\n"
+                "\n❗️ Attention : Ce champ est obligatoire.",
+            ),
+            (
+                "location",
+                "Localisation :",
+                "Veuillez entrer la Localisation du tournoi.\n"
+                "Si vous appuyez sur la touche 'Entrée' sans rien saisir,"
+                "vous aurez la possibilité d'annuler l'opération.\n"
+                "\n❗️ Attention : Ce champ est obligatoire.",
+            ),
+            (
+                "start_date",
+                "Date de début (YYYY-MM-DD) :",
+                "Veuillez entrer la Date de début du tournoi.\n"
+                "Si vous appuyez sur la touche 'Entrée' sans rien saisir, "
+                "vous aurez la possibilité d'annuler l'opération.\n"
+                "\n❗️ Attention : Ce champ est obligatoire.",
+            ),
+            (
+                "end_date",
+                "Date de fin (YYYY-MM-DD) :",
+                "Veuillez entrer la Date de fin du tournoi.\n"
+                "Si vous appuyez sur la touche 'Entrée' sans rien saisir, "
+                "vous aurez la possibilité d'annuler l'opération.\n"
+                "\n❗️ Attention : Ce champ est obligatoire.",
+            ),
+            (
+                "description",
+                "Description :",
+                "Veuillez entrer une Description pour le tournoi.\n"
+                "Si vous appuyez sur la touche 'Entrée' sans rien saisir, "
+                "vous aurez la possibilité d'annuler l'opération.\n"
+                "\n❗️ Attention : Ce champ est obligatoire.",
+            ),
+            (
+                "rounds_count",
+                "Nombre de rounds (laisser vide pour 4 par défaut) :",
+                "Veuillez entrer le nombre de rounds pour le tournoi.\n"
+                "Si vous appuyez sur la touche 'Entrée' sans rien saisir, "
+                "vous aurez la possibilité d'annuler l'opération.\n"
+                "\n❗️ Attention : Ce champ est obligatoire.",
+            ),
+        ]
 
-        start_date = self.text_with_cancel("Date de début (YYYY-MM-DD) :")
-        if start_date is None:
-            return None
+        while self.current_step < len(steps):
+            attr, message, instruction = steps[self.current_step]
 
-        end_date = self.text_with_cancel("Date de fin (YYYY-MM-DD) :")
-        if end_date is None:
-            return None
+            if attr == "rounds_count":
+                value = self.get_rounds_count_with_default(message)
+            else:
+                value = self.text_with_cancel(message, instruction)
 
-        description = self.text_with_cancel("Description :")
-        if description is None:
-            return None
+            if value == "edit":
+                self.edit_info()
+                continue
+            elif value is None:
+                return None
 
-        rounds_count = self.get_rounds_count_with_default("Nombre de rounds (laisser vide pour 4 par défaut) :")
-        if rounds_count is None:
-            return None
+            setattr(self, attr, value)
+            self.current_step += 1
 
-        return name, location, start_date, end_date, description, rounds_count
+        return self.confirm_tournament_creation()
 
-    def text_with_cancel(self, message):
+    def text_with_cancel(self, message, long_instruction):
         """
-        Affiche un input permettant à l'utilisateur de saisir une valeur ou d'annuler l'opération.
-
-        Args:
-            message (str): Le message à afficher.
-
-        Returns:
-            str or None: La valeur saisie par l'utilisateur ou None si l'opération est annulée.
+        Capture un texte avec la possibilité d'annuler ou d'éditer une étape précédente.
         """
         while True:
-            text_input = inquirer.text(message=f"{message}", style=self.custom_style, qmark="", amark="").execute()
+            text_input = inquirer.text(
+                message=f"{message}",
+                long_instruction=f"{long_instruction}\n\n{self.get_formatted_info_table()}",
+                style=self.custom_style,
+                qmark="",
+                amark="",
+            ).execute()
+            clear_console()
 
             if text_input == "":
+
+                longest_choice_length = max(
+                    len("Continuer la création"),
+                    len("Éditer une information"),
+                    len("Annuler la création du tournoi")
+                    )
+
                 choice = inquirer.select(
-                    message="Le champ ne peut pas être vide. Que souhaitez-vous faire ?",
+                    message="\nLe champ ne peut pas être vide. Que souhaitez-vous faire ?\n",
+                    long_instruction="Vous pouvez soit continuer à créer le tournoi, "
+                    "soit éditer une information déjà saisie, "
+                    "soit annuler l'opération.",
                     choices=[
-                        Choice(value=None, name="Continuer la création du tournoi"),
-                        Choice(value="cancel", name="Annuler"),
+                        Choice(value="continue", name="Continuer la création"),
+                        Choice(value="edit", name="Éditer une information"),
+                        Separator(line="-" * longest_choice_length),
+                        Choice(value="cancel", name="Annuler la création du tournoi"),
                     ],
                     style=self.custom_style,
                     pointer="❯",
@@ -113,47 +206,165 @@ class TournamentView(BaseView):
                     show_cursor=False,
                 ).execute()
                 clear_console()
-                print("Appuyez sur Entrée pour annuler\n")
 
                 if choice == "cancel":
                     clear_console()
                     return None
+                elif choice == "edit":
+                    return "edit"
+                elif choice == "continue":
+                    clear_console()
+                    continue
             else:
                 return text_input
 
-    def get_rounds_count_with_default(self, message):
+    def get_formatted_info_table(self):
         """
-        Affiche une invite permettant à l'utilisateur de saisir le nombre de rounds ou d'utiliser la valeur par défaut.
+        Retourne une table formatée contenant les informations saisies pour le tournoi.
+        """
+        plain_console = Console(force_terminal=False)
+        table = Table(show_header=True, box=box.SQUARE, show_lines=True)
+        table.add_column("Informations du tournoi", justify="left")
+        table.add_column("Valeur saisie", justify="left")
+        table.add_row("Nom du tournoi", self.name or "")
+        table.add_row("Localisation", self.location or "")
+        table.add_row("Date de début", self.start_date or "")
+        table.add_row("Date de fin", self.end_date or "")
+        table.add_row("Description", self.description or "")
+        table.add_row("Nombre de rounds", str(self.rounds_count) or "")
 
-        Args:
-            message (str): Le message à afficher.
+        with plain_console.capture() as capture:
+            plain_console.print(table)
 
-        Returns:
-            str: Le nombre de rounds saisi par l'utilisateur ou la valeur par défaut.
+        return capture.get()
+
+    def confirm_tournament_creation(self):
+        """
+        Confirme la création du tournoi après avoir vérifié les informations saisies.
         """
         while True:
-            rounds_input = inquirer.text(message=f"{message}", style=self.custom_style, qmark="", amark="").execute()
+            confirmation = inquirer.select(
+                message=f"\nConfirmez-vous la création du tournoi {self.name} ?\n",
+                long_instruction="Nous vous invitons à vérifier les informations saisies :\n"
+                f"\n{self.get_formatted_info_table()}\n"
+                "Puis à confirmer si vous souhaitez créer ce tournoi, éditer une information ou annuler l'opération.",
+                choices=[
+                    Choice(value="yes", name="Créer le tournoi"),
+                    Choice(value="edit", name="Éditer une information"),
+                    Choice(value="no", name="Annuler"),
+                ],
+                style=self.custom_style,
+                pointer="❯",
+                qmark="",
+                show_cursor=False,
+            ).execute()
+
+            if confirmation == "yes":
+                return self.name, self.location, self.start_date, self.end_date, self.description, self.rounds_count
+            elif confirmation == "edit":
+                edit_choice = self.edit_info()
+                if edit_choice == "cancel":
+                    continue
+            elif confirmation == "no":
+                clear_console()
+                return None
+
+    def edit_info(self):
+        """
+        Permet à l'utilisateur d'éditer les informations saisies pour le tournoi.
+        """
+        choices = []
+        if self.name:
+            choices.append(Choice(value="name", name="Nom du tournoi"))
+        if self.location:
+            choices.append(Choice(value="location", name="Localisation"))
+        if self.start_date:
+            choices.append(Choice(value="start_date", name="Date de début"))
+        if self.end_date:
+            choices.append(Choice(value="end_date", name="Date de fin"))
+        if self.description:
+            choices.append(Choice(value="description", name="Description"))
+        if self.rounds_count:
+            choices.append(Choice(value="rounds_count", name="Nombre de rounds"))
+
+        choices.append(Separator(line="-" * 30))
+        choices.append(Choice(value="cancel", name="Sortir du mode édition"))
+
+        choice = inquirer.select(
+            message="Quelle information souhaitez-vous éditer ?",
+            choices=choices,
+            style=self.custom_style,
+            pointer="❯",
+            qmark="",
+            show_cursor=False,
+            long_instruction="Veuillez choisir l'information que vous souhaitez éditer ou "
+            "sortez de l'édition pour continuer la création du tournoi.\n"
+            f"\n{self.get_formatted_info_table()}",
+        ).execute()
+
+        if choice == "cancel":
+            clear_console()
+            return None
+
+        if choice == "name":
+            self.name = self.text_with_cancel(
+                "Nom du tournoi :",
+                "Veuillez entrer le Nom du tournoi."
+            )
+        elif choice == "location":
+            self.location = self.text_with_cancel(
+                "Localisation :",
+                "Veuillez entrer la Localisation du tournoi."
+            )
+        elif choice == "start_date":
+            self.start_date = self.text_with_cancel(
+                "Date de début (YYYY-MM-DD) :",
+                "Veuillez entrer la Date de début du tournoi."
+            )
+        elif choice == "end_date":
+            self.end_date = self.text_with_cancel(
+                "Date de fin (YYYY-MM-DD) :",
+                "Veuillez entrer la Date de fin du tournoi."
+            )
+        elif choice == "description":
+            self.description = self.text_with_cancel(
+                "Description :",
+                "Veuillez entrer une Description pour le tournoi."
+            )
+        elif choice == "rounds_count":
+            self.rounds_count = int(self.text_with_cancel(
+                "Nombre de rounds (laisser vide pour 4 par défaut) :",
+                "Veuillez entrer le nombre de rounds pour le tournoi.") or 4
+            )
+
+        return choice
+
+    def get_rounds_count_with_default(self, message):
+        """
+        Capture le nombre de rounds avec une valeur par défaut.
+        """
+        while True:
+            rounds_input = inquirer.text(
+                message=f"{message}",
+                long_instruction=(
+                    "Appuyez sur 'Entrée' sans saisir de valeur pour utiliser la valeur par défaut de 4."
+                    f"\n\n{self.get_formatted_info_table()}"
+                ),
+                style=self.custom_style,
+                qmark="",
+                amark="",
+            ).execute().strip()
 
             if rounds_input == "":
-                choice = inquirer.select(
-                    message="Que souhaitez-vous faire ?",
-                    choices=[
-                        Choice(value="default", name="Appliquer 4 rounds (par défaut)"),
-                        Choice(value="cancel", name="Annuler"),
-                    ],
-                    style=self.custom_style,
-                    pointer="❯",
-                    qmark="",
-                    show_cursor=False,
-                ).execute()
-
-                if choice == "default":
-                    return "4"
-                elif choice == "cancel":
-                    clear_console()
-                    return None
+                # Applique la valeur par défaut si aucune saisie n'est faite
+                return 4
             else:
-                return rounds_input
+                try:
+                    rounds_count = int(rounds_input)
+                    return rounds_count
+                except ValueError:
+                    self.show_message("Veuillez entrer un nombre valide pour les rounds.")
+                    continue
 
     def list_tournaments(self, tournaments_df):
         """
@@ -190,9 +401,9 @@ class TournamentView(BaseView):
 
         self.console.print(table)
 
-    def select_tournament(self, tournaments):
+    def select_tournament(self, action, tournaments):
         """
-        Affiche une liste de tournois à sélectionner.
+        Affiche une liste de tournois à sélectionner et capture le choix de l'utilisateur.
 
         Args:
             tournaments (list): La liste des tournois.
@@ -200,13 +411,22 @@ class TournamentView(BaseView):
         Returns:
             str: Le choix de l'utilisateur.
         """
-        choices = [Choice(value=i, name=f"🏆 {tournament['name']}") for i, tournament in enumerate(tournaments)] + [
-            Separator(),
-            Choice(value="main_menu", name="🔙 Retour au menu principal"),
+
+        longest_choice_length = max(
+            max(len(f"🏆 {tournament['name']}") for tournament in tournaments),
+            len("Retour au menu précédent")
+        )
+
+        choices = [
+            Choice(value=i, name=f"🏆 {tournament['name']}") for i, tournament in enumerate(tournaments)] + [
+            Separator(line="-" * (longest_choice_length + 1)),
+            Choice(value="main_menu", name="Retour au menu précédent"),
         ]
 
         choice = inquirer.select(
-            message="Choisissez un tournoi",
+            message=f"\nVeuillez sélectionner le tournoi à {action} :\n",
+            long_instruction="\nVeuillez choisir parmis la liste des tournois disponibles, "
+            f"celui que vous voulez {action}",
             choices=choices,
             pointer="❯",
             qmark="",
@@ -250,17 +470,30 @@ class TournamentView(BaseView):
         Returns:
             str: Le choix de l'utilisateur.
         """
+        longest_choice_length = max(
+            len("Ajouter des joueurs au tournoi"),
+            len("Retirer des joueurs au tournoi"),
+            len("Commencer le tournoi"),
+            len("Retour au menu précédent"),
+        )
 
         actions = [
-            Choice(value="add", name="➕ Ajouter des joueurs"),
-            Choice(value="remove", name="➖ Retirer des joueurs"),
-            Choice(value="start", name="🏁 Commencer le tournoi"),
-            Separator(),
-            Choice(value="cancel", name="🔙 Retour au menu précédent"),
+            Choice(value="add", name="Ajouter des joueurs au tournoi"),
+            Choice(value="remove", name="Retirer des joueurs du tournoi"),
+            Choice(value="start", name="Commencer le tournoi"),
+            Separator(line="-" * longest_choice_length),
+            Choice(value="cancel", name="Retour au menu précédent"),
         ]
 
         action = inquirer.select(
             message="\nQue souhaitez-vous faire ?\n",
+            long_instruction="Dans ce menu, vous avez accès à ces quatre fonctionnalités :"
+            "\n\n- Ajouter des joueurs au tournoi (vous pourrez même créer un nouveau joueur)"
+            "\n- Retirer des joueurs du tournoi (vous pourrez retirer un joueur du tournoi)"
+            "\n- Commencer le tournoi (c'est ici que tout commence !)"
+            "\n- Retour au menu précédent (vous pourrez revenir au menu précédent pour les autres fonctionnalités)\n"
+            "\n❗️ Attention : Tout ajout, suppression ou démarrage d'un tournoi entraînera"
+            "la modification immédiate et automatique des fichiers 'datas/players.json' et 'datas/tournaments.json'",
             choices=actions,
             pointer="❯",
             qmark="",
@@ -278,10 +511,10 @@ class TournamentView(BaseView):
         """
 
         actions = [
-            Choice(value="add", name="➕ Ajouter des joueurs"),
+            Choice(value="add", name="Ajouter des joueurs"),
             Separator(line=27 * "-"),
-            Choice(value="back", name="🔙 Retour au menu précédent"),
-            Choice(value="main_menu", name="🏠 Retour au menu principal"),
+            Choice(value="back", name="Retour au menu précédent"),
+            Choice(value="main_menu", name="Retour au menu principal"),
         ]
         action = inquirer.select(
             message="\nQue souhaitez-vous faire ?\n",
@@ -311,8 +544,8 @@ class TournamentView(BaseView):
             for player in tournament_players
         ]
         choices.append(Separator(line=50 * "-"))
-        choices.append(Choice("back", name="🔙 Retour au menu précédent"))
-        choices.append(Choice("main_menu", name="🏠 Retour au menu principal"))
+        choices.append(Choice("back", name="Retour au menu précédent"))
+        choices.append(Choice("main_menu", name="Retour au menu principal"))
 
         choice = inquirer.select(
             message="Sélectionnez le joueur à retirer :\n",
