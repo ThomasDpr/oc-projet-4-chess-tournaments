@@ -13,7 +13,7 @@ Bienvenue dans l'application de gestion de tournois d'échecs ! Cette applicatio
 
 - [Lancement du Programme](#lancement-du-programme)
 - [Fonctionnalités](#fonctionnalités)
-- [Génération d'un Rapport Flake8](#génération-d'un-rapport-flake8)
+- [Génération d'un Rapport Flake8](#génération-dun-rapport-flake8)
 
 ## Prérequis
 
