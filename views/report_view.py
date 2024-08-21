@@ -53,7 +53,7 @@ class ReportView(BaseView):
             show_cursor=False,
             long_instruction="Dans le menu des rapports, vous avez accès à ces six fonctionnalités :"
             "\n\n- Liste de tous les joueurs (triés par ordre alphabétique)"
-            "\n- Liste de tous les tournois (stockés dans le fichier 'data/tournaments.json')"
+            "\n- Liste de tous les tournois (stockés dans le fichier 'datas/tournaments.json')"
             "\n- Nom et dates d’un tournoi donné (informations détaillées d'un tournoi donné)"
             "\n- Liste des joueurs d'un tournoi (triés par ordre alphabétique)"
             "\n- Liste de tous les rounds d'un tournoi et de tous les matchs d'un round"
@@ -128,26 +128,42 @@ class ReportView(BaseView):
         clear_console()
         return choice
 
-    def display_rounds_and_matches(self, tournament_data, rounds):
-        """
-        Affiche les rounds et les matchs d'un tournoi donné.
-        """
+    def display_rounds_and_matches(self, tournament_name, rounds, players_df):
+        self.console.print(f"[bold magenta]Tournoi : {tournament_name}[/bold magenta]\n")
 
-        self.console.print(f"[bold magenta]Tournoi : {tournament_data['name']}[/bold magenta]")
         for round_ in rounds:
             table = Table(title=round_.name, show_header=True, header_style="bold magenta")
             table.add_column("Joueur 1", style="cyan")
+            table.add_column("ID Joueur 1", style="green")
             table.add_column("Joueur 2", style="cyan")
-            table.add_column("Score", justify="center")
+            table.add_column("ID Joueur 2", style="green")
+            table.add_column("Score", justify="center", style="yellow")
 
             for match in round_.matches:
-                player1 = self.player_controller.get_player_by_national_id(match.player1_id)
-                player2 = self.player_controller.get_player_by_national_id(match.player2_id)
-                match_info = f"{match.score_player1} - {match.score_player2}"
+                # Chercher les joueurs dans players_df pour récupérer les informations complètes
+                player1_data = players_df.loc[players_df['national_id'].str.strip() == match.player1_id.strip()]
+                player2_data = players_df.loc[players_df['national_id'].str.strip() == match.player2_id.strip()]
+
+                if player1_data.empty:
+                    player1_info = "[Joueur introuvable]"
+                    player1_id = match.player1_id
+                else:
+                    player1_info = f"{player1_data.iloc[0]['first_name']} {player1_data.iloc[0]['last_name']}"
+                    player1_id = player1_data.iloc[0]['national_id']
+
+                if player2_data.empty:
+                    player2_info = "[Joueur introuvable]"
+                    player2_id = match.player2_id
+                else:
+                    player2_info = f"{player2_data.iloc[0]['first_name']} {player2_data.iloc[0]['last_name']}"
+                    player2_id = player2_data.iloc[0]['national_id']
+
                 table.add_row(
-                    f"{player1.first_name} {player1.last_name}",
-                    f"{player2.first_name} {player2.last_name}",
-                    match_info,
+                    player1_info,
+                    player1_id,
+                    player2_info,
+                    player2_id,
+                    f"{match.score_player1} - {match.score_player2}"
                 )
 
             self.console.print(table)
@@ -157,7 +173,6 @@ class ReportView(BaseView):
         Demande à l'utilisateur s'il souhaite exporter les données ou revenir au menu précédent.
         """
 
-        # choices = ["Exporter", "Retour au menu précédent"]
         # Calcul de la longueur du choix le plus long pour ajuster la taille du Separator
         longest_choice_length = max(len("📁 Exporter les données"), len("🔙 Retour au menu précédent"))
         choices = [
