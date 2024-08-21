@@ -1,0 +1,152 @@
+[
+  {
+    "name":"Challenge des Échecs",
+    "location":"Rémy-la-Forêt",
+    "start_date":"2024-04-17",
+    "end_date":"2024-04-21",
+    "description":"Un rendez-vous incontournable pour les amateurs et professionnels des échecs.",
+    "rounds_count":5,
+    "current_round":0,
+    "rounds":[
+
+    ],
+    "players":[
+
+    ]
+  },
+  {
+    "name":"Tournoi des Maîtres",
+    "location":"Sainte Théodore",
+    "start_date":"2023-10-20",
+    "end_date":"2023-10-21",
+    "description":"Un défi épique pour couronner le meilleur joueur d'échecs.",
+    "rounds_count":5,
+    "current_round":0,
+    "rounds":[
+
+    ],
+    "players":[
+
+    ]
+  },
+  {
+    "name":"Coupe des Stratèges",
+    "location":"Saint Victor",
+    "start_date":"2024-04-18",
+    "end_date":"2024-04-24",
+    "description":"Un événement majeur dans le monde des échecs, attirant des talents de tous horizons.",
+    "rounds_count":7,
+    "current_round":0,
+    "rounds":[
+
+    ],
+    "players":[
+
+    ]
+  },
+  {
+    "name":"Festival des Échecs",
+    "location":"Neveu",
+    "start_date":"2024-08-19",
+    "end_date":"2024-08-20",
+    "description":"Une rencontre d'échecs avec des parties captivantes et intenses.",
+    "rounds_count":5,
+    "current_round":0,
+    "rounds":[
+
+    ],
+    "players":[
+
+    ]
+  },
+  {
+    "name":"Grand Prix des Échecs",
+    "location":"Saint Antoinetteboeuf",
+    "start_date":"2024-07-10",
+    "end_date":"2024-07-16",
+    "description":"Une compétition intense réunissant des passionnés d'échecs du monde entier.",
+    "rounds_count":6,
+    "current_round":0,
+    "rounds":[
+
+    ],
+    "players":[
+
+    ]
+  },
+  {
+    "name":"Olympiade des Échecs",
+    "location":"Charles-sur-Mer",
+    "start_date":"2023-12-13",
+    "end_date":"2023-12-14",
+    "description":"Un tournoi international d'échecs avec des participants de haut niveau.",
+    "rounds_count":7,
+    "current_round":0,
+    "rounds":[
+
+    ],
+    "players":[
+
+    ]
+  },
+  {
+    "name":"Rencontre des Grands Maîtres",
+    "location":"Saint Susannedan",
+    "start_date":"2024-05-10",
+    "end_date":"2024-05-13",
+    "description":"Une compétition féroce avec des prix prestigieux à gagner.",
+    "rounds_count":6,
+    "current_round":0,
+    "rounds":[
+
+    ],
+    "players":[
+
+    ]
+  },
+  {
+    "name":"Championnat des Échecs",
+    "location":"Saint HenrietteBourg",
+    "start_date":"2023-11-29",
+    "end_date":"2023-12-02",
+    "description":"Un tournoi d'échecs où l'intelligence et la stratégie priment.",
+    "rounds_count":6,
+    "current_round":0,
+    "rounds":[
+
+    ],
+    "players":[
+
+    ]
+  },
+  {
+    "name":"Tournoi International d'Échecs",
+    "location":"Petitjean-la-Forêt",
+    "start_date":"2023-09-16",
+    "end_date":"2023-09-22",
+    "description":"Un tournoi prestigieux pour les meilleurs joueurs d'échecs.",
+    "rounds_count":7,
+    "current_round":0,
+    "rounds":[
+
+    ],
+    "players":[
+
+    ]
+  },
+  {
+    "name":"Open d'Échecs",
+    "location":"Martelboeuf",
+    "start_date":"2024-03-05",
+    "end_date":"2024-03-10",
+    "description":"Un événement annuel où se confrontent les stratèges les plus talentueux.",
+    "rounds_count":4,
+    "current_round":0,
+    "rounds":[
+
+    ],
+    "players":[
+
+    ]
+  }
+]
