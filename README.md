@@ -9,7 +9,7 @@ Bienvenue dans l'application de gestion de tournois d'échecs ! Cette applicatio
 - [Installation des dépendances](#installation-des-dépendances)
 
   - [Recommandé : Pipenv](#recommandé--pipenv)
-  - [Classique : Pip](#classique--pip)
+  - [Classique : Pip et virtualenv](#classique--pip-et-virtualenv)
 
 - [Lancement du Programme](#lancement-du-programme)
 - [Fonctionnalités](#fonctionnalités)
@@ -19,13 +19,13 @@ Bienvenue dans l'application de gestion de tournois d'échecs ! Cette applicatio
 
 - Python 3.11 ou supérieur
 - Pip (Gestionnaire natif de Python)
-- Pipenv (Gestionnaire de dépendances)
+- Pipenv (Gestionnaire de dépendances) ou virtualenv (pour l'utilisation avec pip)
 
 Ce projet a été conçu avec la version de Python `3.12.3` et le gestionnaire de dépendances **`Pipenv`** (version `2023.12.1`).
 
 Je vous recommande l'utilisation de Pipenv pour gérer les dépendances de ce projet.
 
-Si toutefois vous souhautez utiliser le gestionnaire de dépendances native de Python : `pip`, le fichier `requirements.txt` contient toutes les dépendances du projet et sera très utile pour vous. Rendez-vous à la section [Installation des dépendances avec Pip](#classique--pip) pour plus de détails.
+Si toutefois vous souhautez utiliser le gestionnaire de dépendances native de Python : `pip`, le fichier `requirements.txt` contient toutes les dépendances du projet et sera très utile pour vous. Rendez-vous à la section [Installation des dépendances avec Pip et virtualenv](#classique--pip-et-virtualenv) pour plus de détails.
 
 ## Cloner le dépôt
 
@@ -79,11 +79,37 @@ Choisissez le type d'installation que vous souhaitez (Pipenv ou Pip)
    pipenv shell
    ```
 
-### Classique : Pip
+### Classique : Pip et virtualenv
 
-1. **Installez les dépendances du projet :**
+1. **Si ce n'est pas déjà fait, installez virtualenv sur votre machine :**
 
    Si vous utilisez `python3`, remplacez `pip` par `pip3`.
+
+   ```sh
+   pip install virtualenv
+   ```
+
+2. **Créez un environnement virtuel :**
+
+   ```sh
+   virtualenv venv
+   ```
+
+3. **Activez l'environnement virtuel :**
+
+   - Sur Windows :
+
+     ```sh
+     venv\Scripts\activate
+     ```
+
+   - Sur MacOS et Linux :
+
+     ```sh
+     source venv/bin/activate
+     ```
+
+4. **Installez les dépendances du projet :**
 
    ```sh
    pip install -r requirements.txt
