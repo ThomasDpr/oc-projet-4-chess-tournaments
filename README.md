@@ -13,6 +13,7 @@ Bienvenue dans l'application de gestion de tournois d'échecs ! Cette applicatio
 
 - [Lancement du Programme](#lancement-du-programme)
 - [Fonctionnalités](#fonctionnalités)
+- [Génération d'un Rapport Flake8](#génération-d'un-rapport-flake8)
 
 ## Prérequis
 
@@ -151,3 +152,17 @@ Mais il est plus agréable de pouvoir en extraire les données dans ces trois fo
 Pour cela, il vous suffit de sélectionner `Exporter` quand il vous sera demandé, puis de choisir le format d'exportation souhaité.
 
 Tous les fichiers exportés seront stockés dans le dossier `reports`.
+
+## Génération d'un Rapport Flake8
+
+Pour générer un rapport Flake8 HTML, il vous suffit d'exécuter la commande suivante depuis votre terminal :
+
+```sh
+flake8 --format=html --htmldir=flake8-report
+```
+
+Le rapport HTML sera généré dans le dossier `flake8_rapport`.
+
+### Recommandation :
+
+Il vous est aussi recommandé d'installer l'extension [Flake8](https://marketplace.visualstudio.com/items?itemName=ms-python.flake8) pour votre IDE afin de pouvoir visualiser les erreurs de style directement dans votre éditeur de code.
