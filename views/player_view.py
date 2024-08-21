@@ -212,7 +212,7 @@ class PlayerView(BaseView):
         while True:
             date_input = self.text_with_cancel(
                 message,
-                "Veuillez entrer la Date de naissance du joueur dans le format JJ-MM-AAAA ou JJ/MM/AAAA.\n"
+                "Veuillez entrer la Date de naissance du joueur dans le format JJ-MM-AAAA , JJ/MM/AAAA ou JJMMAAAA.\n"
                 "Si vous appuyez sur la touche 'Entrée' sans rien saisir,"
                 "vous aurez la possibilité d'annuler l'opération.\n"
                 "\n❗️ Attention : Ce champ est obligatoire.",
