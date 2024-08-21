@@ -12,7 +12,6 @@ Bienvenue dans l'application de gestion de tournois d'échecs ! Cette applicatio
   - [Classique : Pip](#classique--pip)
 
 - [Lancement du Programme](#lancement-du-programme)
-- [Structure du Projet](#structure-du-projet)
 - [Fonctionnalités](#fonctionnalités)
 
 ## Prérequis
@@ -117,7 +116,7 @@ Dans ce menu, vous avez accès à cinq fonctionnalités :
 - Afficher tous les joueurs
 - Retour au menu principal
 
-Tout ajout ou suppression de joueur entraînera la modification immédiate du fichier `data/players.json`.
+Tout ajout ou suppression de joueur entraînera la modification immédiate du fichier `datas/players.json`.
 
 ### Gestion des tournois
 
@@ -129,7 +128,7 @@ Dans ce menu, vous avez accès à cinq fonctionnalités :
 - Liste de tous les tournois
 - Retour au menu principal
 
-Tout ajout, lancement ou reprise de tournoi entraînera la modification immédiate du fichier `data/tournaments.json`.
+Tout ajout, lancement ou reprise de tournoi entraînera la modification immédiate du fichier `datas/tournaments.json`.
 
 ### Gestion des rapports
 
