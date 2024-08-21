@@ -32,6 +32,30 @@ class PlayerView(BaseView):
         self.formatted_national_id = ""
         self.current_step = 0
 
+    def ask_to_add_player(self):
+        """
+        Propose à l'utilisateur d'ajouter un joueur ou de revenir au menu précédent
+        lorsque la base de données des joueurs est vide.
+        """
+        longest_choice_length = max(len("🆕 Ajouter un joueur"), len("🔙 Revenir au menu précédent"))
+        choices = [
+            Choice(value="add_player", name="🆕 Ajouter un joueur"),
+            Separator(line="-" * (longest_choice_length + 1)),
+            Choice(value="back_to_menu", name="🔙 Revenir au menu précédent"),
+        ]
+        choice = inquirer.select(
+            message="La base de données des joueurs est vide. Que souhaitez-vous faire ?\n",
+            long_instruction="Vous pouvez ajouter un nouveau joueur à la base de données "
+            "ou revenir au menu précédent.",
+            choices=choices,
+            style=self.custom_style,
+            pointer="❯",
+            qmark="",
+            show_cursor=False,
+        ).execute()
+
+        return choice
+
     def reset_info(self):
         """
         Réinitialise les informations du joueur.
@@ -80,7 +104,7 @@ class PlayerView(BaseView):
             \n- Afficher tous les joueurs (vous pourrez visualiser les informations complète de tous les joueurs)\
             \n- Retour au menu principal (vous pourrez revenir au menu principal pour voir les autres fonctionnalités)\
             \n\n❗ Attention : Tout ajout ou suppression d'un joueur entraînera"
-            "la modification immédiate et automatique du fichier 'data/players.json'",
+            "la modification immédiate et automatique du fichier 'datas/players.json'",
             choices=menu_options,
             pointer="❯",
             qmark="",
@@ -129,7 +153,7 @@ class PlayerView(BaseView):
                 "last_name",
                 "Nom de famille :",
                 "Veuillez entrer le Nom de famille du joueur\n"
-                "Si vous appuyez sur la touche 'Entrée' sans rien saisir,"
+                "Si vous appuyez sur la touche 'Entrée' sans rien saisir, "
                 "vous aurez la possibilité d'annuler l'opération.\n"
                 "\n❗️ Attention : Ce champ est obligatoire.",
             ),
@@ -137,15 +161,15 @@ class PlayerView(BaseView):
                 "first_name",
                 "Prénom :",
                 "Veuillez entrer le Prénom du joueur\n"
-                "Si vous appuyez sur la touche 'Entrée' sans rien saisir,"
+                "Si vous appuyez sur la touche 'Entrée' sans rien saisir, "
                 "vous aurez la possibilité d'annuler l'opération.\n"
                 "\n❗️ Attention : Ce champ est obligatoire.",
             ),
             (
                 "birth_date",
                 "Date de naissance :",
-                "Veuillez entrer la Date de naissance du joueur dans le format JJ-MM-AAAA ou JJ/MM/AAAA.\n"
-                "Si vous appuyez sur la touche 'Entrée' sans rien saisir,"
+                "Veuillez entrer la Date de naissance du joueur dans le format JJ-MM-AAAA , JJ/MM/AAAA ou JJMMAAAA.\n"
+                "Si vous appuyez sur la touche 'Entrée' sans rien saisir, "
                 "vous aurez la possibilité d'annuler l'opération.\n"
                 "\n❗️ Attention : Ce champ est obligatoire.",
             ),
@@ -153,7 +177,7 @@ class PlayerView(BaseView):
                 "national_id",
                 "Identifiant national :",
                 "Veuillez entrer l'Identifiant national du joueur dans le format AB1234.\n"
-                "Si vous appuyez sur la touche 'Entrée' sans rien saisir,"
+                "Si vous appuyez sur la touche 'Entrée' sans rien saisir, "
                 "vous aurez la possibilité d'annuler l'opération.\n"
                 "\n❗️ Attention : Ce champ est obligatoire.",
             ),
@@ -241,15 +265,22 @@ class PlayerView(BaseView):
 
             # Si l'utilisateur ne saisit rien, afficher des options supplémentaires
             if text_input == "":
+                longest_choice_length = max(
+                    len("Continuer la création"),
+                    len("Éditer une information"),
+                    len("Annuler la création du joueur")
+                    )
+
                 choice = inquirer.select(
                     message="\nLe champ ne peut pas être vide. Que souhaitez-vous faire ?\n",
                     long_instruction="Vous pouvez soit continuer à créer le joueur "
-                    "soit annuler l'opération, "
-                    "soit éditer une information déjà saisie.",
+                    "soit éditer une information déjà saisie, "
+                    "soit annuler l'opération.",
                     choices=[
-                        Choice(value="continue", name="Continuer la création du joueur"),
-                        Choice(value="cancel", name="Annuler"),
+                        Choice(value="continue", name="Continuer la création"),
                         Choice(value="edit", name="Éditer une information"),
+                        Separator(line="-" * (longest_choice_length)),
+                        Choice(value="cancel", name="Annuler la création du joueur"),
                     ],
                     style=self.custom_style,
                     pointer="❯",
@@ -264,6 +295,7 @@ class PlayerView(BaseView):
                 elif choice == "edit":
                     return "edit"
                 elif choice == "continue":
+                    clear_console()
                     continue
             else:
                 return text_input
@@ -288,14 +320,13 @@ class PlayerView(BaseView):
 
         return capture.get()
 
-    def get_player_national_id(self, action):
+    def get_player_national_id(self, action, list_players_callback=None):
         """
         Demande à l'utilisateur de saisir l'identifiant national du joueur pour une action spécifique.
         Soit pour le supprimer, soit pour le rechercher.
         """
-
-        return (
-            inquirer.text(
+        while True:
+            national_id = inquirer.text(
                 message=f"\nVeuillez saisir l'identifiant national du joueur à {action} :",
                 long_instruction="\nVeuillez entrer l'identifiant national unique du joueur "
                 f"que vous souhaitez {action}.\n"
@@ -303,11 +334,36 @@ class PlayerView(BaseView):
                 style=self.custom_style,
                 qmark="",
                 amark="",
-            )
-            .execute()  # Capture de l'entrée utilisateur
-            .strip()  # Suppression des espaces blancs en début et fin de la chaîne
-            .upper()  # Met en majuscules
-        )
+            ).execute().strip().upper()
+
+            if not national_id:
+                clear_console()
+                longest_choice_length = max(
+                    len("🔄 Rechercher à nouveau un joueur à " + action), len("🔙 Revenir au menu précédent")
+                    )
+                choice = inquirer.select(
+                    message="\nLe champ est vide, que souhaitez-vous faire ?\n",
+                    choices=[
+                        Choice(value="retry", name="🔄 Rechercher à nouveau un joueur à " + action),
+                        Separator(line="-" * (longest_choice_length + 1)),
+                        Choice(value="back", name="🔙 Revenir au menu précédent")
+                    ],
+                    style=self.custom_style,
+                    pointer="❯",
+                    qmark="",
+                    show_cursor=False,
+                ).execute()
+
+                if choice == "back":
+                    clear_console()
+                    return None
+                elif choice == "retry":
+                    clear_console()
+                    if list_players_callback:
+                        list_players_callback()
+                    continue
+
+            return national_id
 
     def confirm_deletion(self):
         """
@@ -316,7 +372,7 @@ class PlayerView(BaseView):
 
         confirmation = inquirer.select(
             message="\nÊtes-vous sûr de vouloir supprimer ce joueur ?",
-            long_instruction="\nLa suppression d'un joueur est irréversible.\n"
+            long_instruction="\n❗️ La suppression d'un joueur est irréversible.\n"
             "Veuillez confirmer si vous souhaitez réellement supprimer ce joueur.",
             choices=[Choice(value="yes", name="Oui"), Choice(value="no", name="Non")],
             style=self.custom_style,
@@ -357,6 +413,7 @@ class PlayerView(BaseView):
         ).execute()
 
         if choice == "cancel":
+            clear_console()
             return None
 
         if choice == "last_name":
@@ -376,12 +433,12 @@ class PlayerView(BaseView):
         Affiche les informations d'un joueur trouvé en utilisant RichTable.
         """
 
-        table = Table(title="Joueur trouvé")
-        table.add_column("Prénom", style="cyan")
-        table.add_column("Nom de famille", style="cyan")
-        table.add_column("Date de naissance", style="cyan")
-        table.add_column("Identifiant national", style="cyan")
-        table.add_column("Career Score", style="cyan")
+        table = Table(title="Joueur trouvé", box=box.SQUARE, header_style="bold magenta")
+        table.add_column("Prénom")
+        table.add_column("Nom de famille")
+        table.add_column("Date de naissance")
+        table.add_column("Identifiant national")
+        table.add_column("Score de carrière")
         table.add_row(
             player["first_name"],
             player["last_name"],
@@ -393,34 +450,45 @@ class PlayerView(BaseView):
 
     def list_players(self, players_df):
         """
-        Affiche la liste de tous les joueurs sous forme de table en utilisant RichTable.
+        Affiche la liste de tous les joueurs sous forme de table en utilisant RichTable,
+        avec des noms de colonnes cohérents avec ceux utilisés dans show_player.
         """
 
-        # Table des joueurs en base de données
+        # Création de la table all_players
         table_all_players = Table(title="Liste des joueurs", box=box.SQUARE, show_lines=True)
-        # Pour chaque colonne dans le DataFrame players_df, on crée une colonne dans la table
-        for col_name in players_df.columns:
-            table_all_players.add_column(col_name, justify="left")
-        # On ajoute chaque ligne du DataFrame à la table
+
+        # ajout des colonnes avec les mêmes noms que dans show_player
+        table_all_players.add_column("Prénom", justify="left", header_style="bold magenta")
+        table_all_players.add_column("Nom de famille", justify="left", header_style="bold magenta")
+        table_all_players.add_column("Date de naissance", justify="left", header_style="bold magenta")
+        table_all_players.add_column("Identifiant national", justify="left", header_style="bold magenta")
+        table_all_players.add_column("Score de carrière", justify="left", header_style="bold magenta")
+
+        # Remplissage de la table avec les données des joueurs
         for index, row in players_df.iterrows():
-            table_all_players.add_row(*map(str, row.tolist()))
-        # On affiche la table à l'écran
+            table_all_players.add_row(
+                row["first_name"],
+                row["last_name"],
+                row["birth_date"],
+                row["national_id"],
+                str(row["career_score"])
+            )
+
+        # Afficher la table dans la console
         self.console.print(table_all_players)
 
-    def display_error_message(self, error_message):
+    def display_error_message(self, national_id):
         """
-        Affiche un message d'erreur.
+        Affiche un message d'erreur sous la forme d'une alerte avec l'identifiant fourni.
         """
-
-        clear_console()
-        print(f"\n❌ - {error_message}\n")
+        self.console.print(f"\n❌ - Aucun joueur trouvé avec l'identifiant national [bold blue]{national_id}[/bold blue].\n", style="bold red")  # noqa: E501
 
     def show_message(self, message):
         """
         Affiche un message.
         """
 
-        print(message)
+        self.console.print(message)
 
     def confirm_player_creation(self):
         """
