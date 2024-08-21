@@ -36,7 +36,15 @@ class DataManager:
             pd.DataFrame(columns=self.columns).to_json(self.file_path, orient="records", indent=4, force_ascii=False)
         # On tente de charger les données depuis le fichier JSON
         try:
-            return pd.read_json(self.file_path)
+
+            data = pd.read_json(self.file_path)
+
+            if data.empty:
+                data = pd.DataFrame(columns=self.columns)
+            elif not all(col in data.columns for col in self.columns):
+                # Si les colonnes du DataFrame ne correspondent pas aux colonnes attendues, on les réinitialise
+                data = pd.DataFrame(columns=self.columns)
+            return data
         # Sinon, on génère une exception DataLoadingError
         except ValueError:
             raise DataLoadingError(self.file_path)
@@ -78,10 +86,10 @@ class PlayerDataManager(DataManager):
     Gestionnaire de données spécifique pour les joueurs.
 
     Args:
-        file_path (str): Chemin vers le fichier JSON des joueurs. Par défaut "data/players.json".
+        file_path (str): Chemin vers le fichier JSON des joueurs. Par défaut "datas/players.json".
     """
 
-    def __init__(self, file_path="data/players.json"):
+    def __init__(self, file_path="datas/players.json"):
         columns = ["first_name", "last_name", "birth_date", "national_id", "career_score"]
         super().__init__(file_path, columns)
 
@@ -91,10 +99,10 @@ class TournamentDataManager(DataManager):
     Gestionnaire de données spécifique pour les tournois.
 
     Args:
-        file_path (str): Chemin vers le fichier JSON des tournois. Par défaut "data/tournaments.json".
+        file_path (str): Chemin vers le fichier JSON des tournois. Par défaut "datas/tournaments.json".
     """
 
-    def __init__(self, file_path="data/tournaments.json"):
+    def __init__(self, file_path="datas/tournaments.json"):
         columns = [
             "name",
             "location",
