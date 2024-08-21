@@ -18,7 +18,7 @@ class PlayerExistsError(ValueError):
         self.national_id = national_id
 
     def __str__(self):
-        return f"Un joueur avec l'identifiant national {self.national_id} existe déjà."
+        return f"Un joueur avec l'identifiant national [bold blue]{self.national_id}[/bold blue] existe déjà.\n"
 
 
 class InvalidNationalIdError(ValueError):
@@ -33,7 +33,7 @@ class InvalidNationalIdError(ValueError):
         self.national_id = national_id
 
     def __str__(self):
-        return f"L'identifiant national {self.national_id} est invalide. Il doit être au format 'AB1234'."
+        return f"Le format de l'Identifiant national [bold blue]{self.national_id}[/bold blue] est [bold red]invalide.[/bold red] Il doit être au format 'AB1234'.\n"  # noqa: E501
 
 
 class InvalidDateFormatError(ValueError):
@@ -48,7 +48,7 @@ class InvalidDateFormatError(ValueError):
         self.date_str = date_str
 
     def __str__(self):
-        return f"Le format de la date {self.date_str} est invalide. Utilisez le format 'JJ-MM-AAAA' ou 'JJ/MM/AAAA'."
+        return f"Le format de la date [bold blue]{self.date_str}[/bold blue] est [bold red]invalide.[/bold red] Utilisez le format 'JJ-MM-AAAA' , 'JJ/MM/AAAA' ou 'JJMMAAAA'.\n"  # noqa: E501
 
 
 class DataLoadingError(Exception):
